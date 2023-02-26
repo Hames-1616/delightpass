@@ -94,12 +94,21 @@
 //   }
 // }
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 void main() {
-  runApp(MyApp());
+ WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+   Future.delayed(Duration(seconds: 2), () {
+    // Remove the splash screen and show the home screen
+    FlutterNativeSplash.remove();
+    runApp(MyApp());
+  });
 }
 
 class MyApp extends StatefulWidget {
@@ -117,7 +126,8 @@ class _MyAppState extends State<MyApp> {
 
   // replace with your home URL
   Future<bool> _onBackPressed() async {
-    if (current == check) {
+    if (current == check ||
+        current == "https://delightpass.com/app-version/login.php") {
       return true;
     } else if (await _controller.canGoBack()) {
       _controller.goBack();
@@ -204,28 +214,78 @@ class _MyAppState extends State<MyApp> {
                 }),
               ),
               _isLoading
-                  ? Center(child: CircularProgressIndicator())
+                  ? const Center(child: CircularProgressIndicator())
                   : Container(),
-            iserror?Container(
-                color: Colors.black38,
-                child: Center(
-                  child: AlertDialog(
-                    title: Text('Network Error'),
-                    content: Text('Please check your internet connection'),
-                    actions: [
-                      TextButton(
-                        child: Text('Retry'),
-                        onPressed: () {
-                          _controller.reload();
-                          setState(() {
-                            iserror = false;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ):Container(),
+              iserror
+                  ? Stack(
+                      children: [
+                        BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                          child: Container(
+                            color: Colors.white.withOpacity(0.5),
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
+                        ),
+                        Center(
+                          child: AlertDialog(
+                            title: const Text(
+                              'Network Error',
+                              style: TextStyle(fontFamily: "Poppins"),
+                            ),
+                            content: const Text(
+                              'Please check your internet connection',
+                              style: TextStyle(fontFamily: "Poppins"),
+                            ),
+                            actions: [
+                              Center(
+                                child: Container(
+                                  // margin: EdgeInsets.only(left: 10,right: 10),
+                                  decoration: BoxDecoration(
+                                      color: Colors.orange,
+                                      borderRadius: BorderRadius.circular(50)),
+                                  child: TextButton(
+                                    child: const Text(
+                                      'Retry',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontFamily: "Poppins"),
+                                    ),
+                                    onPressed: () {
+                                      // _controller.reload();
+                                      // setState(() {
+                                      //   iserror = false;
+                                      // });
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
+                  //  Container(
+                  //     color: Colors.black38,
+                  //     child: Center(
+                  //       child: AlertDialog(
+                  //         title: const Text('Network Error'),
+                  //         content: const Text('Please check your internet connection'),
+                  //         actions: [
+                  //           TextButton(
+                  //             child: const Text('Retry'),
+                  //             onPressed: () {
+                  //               _controller.reload();
+                  //               setState(() {
+                  //                 iserror = false;
+                  //               });
+                  //             },
+                  //           ),
+                  //         ],
+                  //       ),
+                  //     ),
+                  //   )
+                  : Container(),
             ],
           ),
         ),
