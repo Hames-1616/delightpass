@@ -99,11 +99,12 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 void main() {
- WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-   Future.delayed(Duration(seconds: 2), () {
+  Future.delayed(Duration(seconds: 2), () {
     // Remove the splash screen and show the home screen
     FlutterNativeSplash.remove();
     runApp(MyApp());
@@ -122,12 +123,22 @@ class _MyAppState extends State<MyApp> {
   late InAppWebViewController _controller;
   bool _isLoading = true;
   List<String> _history = ['https://delightpass.com/app-version'];
-
+  bool exit = false;
+  
   // replace with your home URL
   Future<bool> _onBackPressed() async {
     if (current == check ||
         current == "https://delightpass.com/app-version/login.php") {
-      return true;
+      if (exit) {
+        return true;
+      } else {
+        Fluttertoast.showToast(
+            msg: "press back again to exit the app",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.SNACKBAR);
+        exit = true;
+        return false;
+      }
     } else if (await _controller.canGoBack()) {
       _controller.goBack();
       URLRequest request = URLRequest(
@@ -179,6 +190,7 @@ class _MyAppState extends State<MyApp> {
                 onLoadStop:
                     (InAppWebViewController controller, Uri? url) async {
                   setState(() {
+                    exit = false;
                     current = url.toString();
                     _isLoading = false;
                   });
