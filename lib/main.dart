@@ -97,6 +97,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -123,22 +124,27 @@ class _MyAppState extends State<MyApp> {
   late InAppWebViewController _controller;
   bool _isLoading = true;
   List<String> _history = ['https://delightpass.com/app-version'];
-  bool exit = false;
-  
+
+  bool disp = false;
+
   // replace with your home URL
   Future<bool> _onBackPressed() async {
     if (current == check ||
         current == "https://delightpass.com/app-version/login.php") {
-      if (exit) {
-        return true;
-      } else {
-        Fluttertoast.showToast(
-            msg: "press back again to exit the app",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.SNACKBAR);
-        exit = true;
-        return false;
-      }
+      setState(() {
+        disp = true;
+      });
+      return false;
+      // if (exit) {
+      //   return true;
+      // } else {
+      //   // Fluttertoast.showToast(
+      //   //     msg: "press back again to exit the app",
+      //   //     toastLength: Toast.LENGTH_SHORT,
+      //   //     gravity: ToastGravity.SNACKBAR);
+      //   exit = true;
+      //   return false;
+      // }
     } else if (await _controller.canGoBack()) {
       _controller.goBack();
       URLRequest request = URLRequest(
@@ -190,7 +196,7 @@ class _MyAppState extends State<MyApp> {
                 onLoadStop:
                     (InAppWebViewController controller, Uri? url) async {
                   setState(() {
-                    exit = false;
+                    disp = false;
                     current = url.toString();
                     _isLoading = false;
                   });
@@ -296,6 +302,94 @@ class _MyAppState extends State<MyApp> {
                   //       ),
                   //     ),
                   //   )
+                  : Container(),
+              disp
+                  ? Stack(
+                      children: [
+                        BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                          child: Container(
+                            color: Colors.white.withOpacity(0.5),
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
+                        ),
+                        Center(
+                          child: AlertDialog(
+                            title: const Text(
+                              'Do you want to exit the app ?',
+                              style: TextStyle(fontFamily: "Poppins"),
+                            ),
+                            // content: const Text(
+                            //   'Please check your internet connection',
+                            //   style: TextStyle(fontFamily: "Poppins"),
+                            // ),
+                            actions: [
+                              Center(
+                                child: Container(
+                                  // margin: EdgeInsets.only(left: 10,right: 10),
+                                  decoration: BoxDecoration(
+                                      
+                                      borderRadius: BorderRadius.circular(50)),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Container(
+                                        // margin: EdgeInsets.only(left: 10,right: 10),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(100),
+                                          color: Colors.orange
+                                        ),
+                                        child: TextButton(
+                                          child: const Text(
+                                            'Yes',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontFamily: "Poppins"),
+                                          ),
+                                          onPressed: () {
+                                            SystemNavigator.pop();
+                                            // _controller.reload();
+                                            // setState(() {
+                                            //   iserror = false;
+                                            // });
+                                          },
+                                        ),
+                                      ),
+                                      
+                                      Container(
+                                        // margin: EdgeInsets.only(left: 10,right: 10),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(100),
+                                          color: Colors.orange
+                                        ),
+                                        child: TextButton(
+                                          child: const Text(
+                                            'No',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontFamily: "Poppins"),
+                                          ),
+                                          onPressed: () {
+                                            setState(() {
+                                              disp = false;
+                                            });
+                                            // _controller.reload();
+                                            // setState(() {
+                                            //   iserror = false;
+                                            // });
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
                   : Container(),
             ],
           ),
